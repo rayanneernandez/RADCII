@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, MapPin, Calendar, Image } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import MobileNav from "@/components/MobileNav";
 
 const MyReports = () => {
   const navigate = useNavigate();
@@ -13,7 +14,7 @@ const MyReports = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-muted/30 pb-20 md:pb-8">
       {/* Header */}
       <header className="bg-card border-b border-border">
         <div className="container mx-auto px-4 py-4">
@@ -89,6 +90,8 @@ const MyReports = () => {
           </div>
         )}
       </div>
+
+      <MobileNav />
     </div>
   );
 };

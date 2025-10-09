@@ -6,9 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ArrowLeft, MapPin, Upload, X } from "lucide-react";
+import { ArrowLeft, MapPin, Upload, X, Loader2 } from "lucide-react";
 import { categories } from "@/data/categories";
 import { toast } from "sonner";
+import LocationMap from "@/components/LocationMap";
 
 const ReportIncident = () => {
   const { categoryId } = useParams();
@@ -21,23 +22,71 @@ const ReportIncident = () => {
     cep: "",
     type: "",
     description: "",
-    files: [] as File[]
+    files: [] as File[],
+    coordinates: [-22.9068, -43.1729] as [number, number] // Rio de Janeiro default
   });
 
   const category = categories.find(c => c.id === categoryId);
   const Icon = category?.icon;
 
   useEffect(() => {
-    // Simula o carregamento automático de localização
+    // Tenta obter localização do navegador
     setIsLoadingLocation(true);
-    setTimeout(() => {
-      setFormData(prev => ({
-        ...prev,
-        address: "Rua Exemplo, 123 - Bairro Centro"
-      }));
+    
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setFormData(prev => ({
+            ...prev,
+            coordinates: [latitude, longitude],
+            address: `Localização detectada: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`
+          }));
+          setIsLoadingLocation(false);
+          toast.success("Localização detectada com sucesso!");
+        },
+        (error) => {
+          console.error("Erro ao obter localização:", error);
+          setFormData(prev => ({
+            ...prev,
+            address: ""
+          }));
+          setIsLoadingLocation(false);
+          toast.info("Não foi possível detectar sua localização. Digite o endereço manualmente.");
+        }
+      );
+    } else {
       setIsLoadingLocation(false);
-    }, 1500);
+      toast.info("Geolocalização não disponível. Digite o endereço manualmente.");
+    }
   }, []);
+
+  const handleCepChange = async (cep: string) => {
+    setFormData(prev => ({ ...prev, cep }));
+    
+    // Remove caracteres não numéricos
+    const cleanCep = cep.replace(/\D/g, "");
+    
+    if (cleanCep.length === 8) {
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
+        const data = await response.json();
+        
+        if (!data.erro) {
+          const fullAddress = `${data.logradouro}, ${data.bairro} - ${data.localidade}, ${data.uf}`;
+          setFormData(prev => ({ ...prev, address: fullAddress }));
+          toast.success("Endereço encontrado!");
+          
+          // Aqui você poderia fazer uma geocodificação para obter coordenadas
+          // Por simplicidade, vamos manter as coordenadas do Rio
+        } else {
+          toast.error("CEP não encontrado");
+        }
+      } catch (error) {
+        toast.error("Erro ao buscar CEP");
+      }
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -148,11 +197,23 @@ const ReportIncident = () => {
                     <Input
                       id="cep"
                       value={formData.cep}
-                      onChange={(e) => setFormData(prev => ({ ...prev, cep: e.target.value }))}
+                      onChange={(e) => handleCepChange(e.target.value)}
                       placeholder="00000-000"
                       maxLength={9}
                       required
                     />
+                  </div>
+
+                  {/* Map Display */}
+                  <div className="space-y-2">
+                    <Label>Localização no Mapa</Label>
+                    <LocationMap 
+                      position={formData.coordinates}
+                      onPositionChange={(newPos) => setFormData(prev => ({ ...prev, coordinates: newPos }))}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Arraste o marcador para ajustar a localização exata
+                    </p>
                   </div>
 
                   <Button type="submit" className="w-full">
