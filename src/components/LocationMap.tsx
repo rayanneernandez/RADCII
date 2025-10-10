@@ -28,19 +28,19 @@ function MapUpdater({ position }: { position: [number, number] }) {
 }
 
 const LocationMap = ({ position, onPositionChange }: LocationMapProps) => {
-  const mapProps = {
+  const mapContainerProps: any = {
     center: position,
     zoom: 15,
     scrollWheelZoom: false,
     style: { width: '100%', height: '100%' }
-  } as any;
+  };
 
-  const tileProps = {
+  const tileLayerProps: any = {
     url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-  } as any;
+  };
 
-  const markerProps = {
+  const markerProps: any = {
     position: position,
     draggable: !!onPositionChange,
     eventHandlers: {
@@ -50,12 +50,12 @@ const LocationMap = ({ position, onPositionChange }: LocationMapProps) => {
         onPositionChange?.([pos.lat, pos.lng]);
       },
     }
-  } as any;
+  };
 
   return (
     <div className="relative w-full h-64 rounded-lg overflow-hidden border border-border">
-      <MapContainer {...mapProps}>
-        <TileLayer {...tileProps} />
+      <MapContainer {...mapContainerProps}>
+        <TileLayer {...tileLayerProps} />
         <Marker {...markerProps} />
         <MapUpdater position={position} />
       </MapContainer>
