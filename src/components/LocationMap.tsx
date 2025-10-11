@@ -55,13 +55,9 @@ const LocationMap = ({ position, onPositionChange }: LocationMapProps) => {
   return (
     <div className="relative w-full h-64 rounded-lg overflow-hidden border border-border">
       <MapContainer {...mapProps}>
-        {() => (
-          <>
-            <TileLayer {...tileProps} />
-            <Marker {...markerProps} />
-            <MapUpdater position={position} />
-          </>
-        )}
+        <TileLayer {...tileProps} />
+        <Marker {...markerProps} />
+        <MapUpdater position={position} />
       </MapContainer>
       <div className="absolute top-2 left-2 bg-white px-2 py-1 rounded shadow-sm flex items-center gap-1 text-xs z-[1000]">
         <MapPin className="w-3 h-3 text-primary" />

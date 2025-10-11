@@ -29,37 +29,7 @@ const ReportIncident = () => {
   const category = categories.find(c => c.id === categoryId);
   const Icon = category?.icon;
 
-  useEffect(() => {
-    // Tenta obter localização do navegador
-    setIsLoadingLocation(true);
-    
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setFormData(prev => ({
-            ...prev,
-            coordinates: [latitude, longitude],
-            address: `Localização detectada: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`
-          }));
-          setIsLoadingLocation(false);
-          toast.success("Localização detectada com sucesso!");
-        },
-        (error) => {
-          console.error("Erro ao obter localização:", error);
-          setFormData(prev => ({
-            ...prev,
-            address: ""
-          }));
-          setIsLoadingLocation(false);
-          toast.info("Não foi possível detectar sua localização. Digite o endereço manualmente.");
-        }
-      );
-    } else {
-      setIsLoadingLocation(false);
-      toast.info("Geolocalização não disponível. Digite o endereço manualmente.");
-    }
-  }, []);
+  // Geolocalização automática removida temporariamente
 
   const handleCepChange = async (cep: string) => {
     setFormData(prev => ({ ...prev, cep }));
