@@ -10,10 +10,13 @@ import { ArrowLeft, MapPin, Upload, X } from "lucide-react";
 import { categories } from "@/data/categories";
 import { toast } from "sonner";
 import LocationMap from "@/components/LocationMap";
+import MobileNav from "@/components/MobileNav";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const ReportIncident = () => {
   const { categoryId } = useParams();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [step, setStep] = useState(1);
   
   const [formData, setFormData] = useState({
@@ -87,7 +90,7 @@ const ReportIncident = () => {
       setStep(3);
     } else {
       toast.success("Ocorrência registrada com sucesso!");
-      navigate("/my-reports");
+      navigate("/dashboard");
     }
   };
 
@@ -298,7 +301,7 @@ const ReportIncident = () => {
                 <>
                   {/* Pré-visualização */}
                   <div className="space-y-6">
-                    <div className="bg-muted/50 rounded-lg p-4 space-y-4">
+                    <div className="bg-card rounded-lg p-4 space-y-4 border border-border">{" "}
                       <div>
                         <h3 className="font-semibold text-sm text-muted-foreground mb-1">Localização</h3>
                         <div className="flex items-start gap-2">
@@ -377,6 +380,7 @@ const ReportIncident = () => {
           </CardContent>
         </Card>
       </div>
+      {isMobile && <MobileNav />}
     </div>
   );
 };
