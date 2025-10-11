@@ -36,8 +36,10 @@ const Priorities = () => {
 
   const handleSave = () => {
     // Aqui você salvaria as prioridades no backend
-    toast.success("Prioridades salvas com sucesso!");
-    navigate("/dashboard");
+    toast.success("Obrigado! Suas prioridades foram salvas com sucesso!");
+    setTimeout(() => {
+      navigate("/dashboard");
+    }, 1500);
   };
 
   return (

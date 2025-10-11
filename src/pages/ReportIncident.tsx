@@ -301,7 +301,7 @@ const ReportIncident = () => {
                 <>
                   {/* Pré-visualização */}
                   <div className="space-y-6">
-                    <div className="bg-card rounded-lg p-4 space-y-4 border border-border">{" "}
+                    <div className="bg-background rounded-lg p-4 space-y-4 border border-border">
                       <div>
                         <h3 className="font-semibold text-sm text-muted-foreground mb-1">Localização</h3>
                         <div className="flex items-start gap-2">
