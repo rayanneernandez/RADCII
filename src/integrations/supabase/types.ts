@@ -14,7 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      incidents: {
+        Row: {
+          address: string
+          category_id: string
+          category_name: string
+          created_at: string | null
+          description: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          media_urls: string[] | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          address: string
+          category_id: string
+          category_name: string
+          created_at?: string | null
+          description: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          media_urls?: string[] | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          address?: string
+          category_id?: string
+          category_name?: string
+          created_at?: string | null
+          description?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          media_urls?: string[] | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
