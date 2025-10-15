@@ -4,14 +4,38 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, MapPin, Calendar, Image } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import MobileNav from "@/components/MobileNav";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 const MyReports = () => {
   const navigate = useNavigate();
+  const [reports, setReports] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Dados de exemplo - substituir com dados reais do backend
-  const reports = [
-    // Vazio por enquanto
-  ];
+  useEffect(() => {
+    fetchReports();
+  }, []);
+
+  const fetchReports = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("incidents")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (data) {
+      setReports(data);
+    }
+    setLoading(false);
+  };
 
   return (
     <div className="min-h-screen bg-muted/30 pb-20 md:pb-8">
@@ -54,13 +78,14 @@ const MyReports = () => {
           </Card>
         ) : (
           <div className="space-y-4">
-            {reports.map((report: any, index: number) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
+            {reports.map((report: any) => (
+              <Card key={report.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <div className="flex items-start justify-between">
-                    <CardTitle className="text-lg">{report.category}</CardTitle>
+                    <CardTitle className="text-lg">{report.category_name}</CardTitle>
                     <Badge variant={report.status === "pending" ? "secondary" : "default"}>
-                      {report.status === "pending" ? "Pendente" : "Em andamento"}
+                      {report.status === "pending" ? "Pendente" : 
+                       report.status === "in_progress" ? "Em andamento" : "Resolvida"}
                     </Badge>
                   </div>
                 </CardHeader>
@@ -75,9 +100,9 @@ const MyReports = () => {
                     </div>
                     <div className="flex items-center">
                       <Calendar className="w-3 h-3 mr-1" />
-                      {report.date}
+                      {format(new Date(report.created_at), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                     </div>
-                    {report.hasMedia && (
+                    {report.media_urls && report.media_urls.length > 0 && (
                       <div className="flex items-center">
                         <Image className="w-3 h-3 mr-1" />
                         Com mídia

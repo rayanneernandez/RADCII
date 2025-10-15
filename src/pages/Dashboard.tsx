@@ -1,14 +1,40 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { MapPin, List, TrendingUp, LogOut, Search, Bell, User } from "lucide-react";
+import { MapPin, List, TrendingUp, LogOut, Search, Bell, User, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { categories } from "@/data/categories";
 import MobileNav from "@/components/MobileNav";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [recentIncidents, setRecentIncidents] = useState<any[]>([]);
+  const [incidentsCount, setIncidentsCount] = useState(0);
+
+  useEffect(() => {
+    fetchRecentIncidents();
+  }, []);
+
+  const fetchRecentIncidents = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from("incidents")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(3);
+
+    if (data) {
+      setRecentIncidents(data);
+      setIncidentsCount(data.length);
+    }
+  };
 
   const handleLogout = () => {
     navigate("/");
@@ -111,31 +137,68 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate("/my-reports")}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Minhas Ocorrências</CardTitle>
-              <List className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-muted-foreground">registradas</p>
-            </CardContent>
-          </Card>
+        {/* Minhas Ocorrências Recentes */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-foreground">
+              Minhas Ocorrências
+            </h3>
+            <Button variant="ghost" size="sm" onClick={() => navigate("/my-reports")}>
+              Ver todas
+            </Button>
+          </div>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Impacto</CardTitle>
-              <MapPin className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-muted-foreground">pessoas</p>
-            </CardContent>
-          </Card>
+          {recentIncidents.length === 0 ? (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <div className="bg-muted rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <List className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  Nenhuma ocorrência registrada
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Comece agora e ajude a melhorar sua cidade!
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {recentIncidents.map((incident) => (
+                <Card key={incident.id} className="hover:shadow-md transition-shadow">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <CardTitle className="text-base">{incident.category_name}</CardTitle>
+                      <Badge variant={incident.status === "pending" ? "secondary" : "default"}>
+                        {incident.status === "pending" ? "Pendente" : 
+                         incident.status === "in_progress" ? "Em andamento" : "Resolvida"}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {incident.description}
+                    </p>
+                    <div className="flex items-center text-xs text-muted-foreground">
+                      <MapPin className="w-3 h-3 mr-1" />
+                      {incident.address}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Floating Action Button */}
+      <Button
+        size="lg"
+        className="fixed bottom-24 right-6 md:bottom-8 rounded-full w-14 h-14 shadow-lg hover:shadow-xl transition-shadow z-40"
+        onClick={() => navigate("/dashboard")}
+      >
+        <Plus className="w-6 h-6" />
+      </Button>
 
       <MobileNav />
     </div>

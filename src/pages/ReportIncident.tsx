@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import LocationMap from "@/components/LocationMap";
 import MobileNav from "@/components/MobileNav";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { supabase } from "@/integrations/supabase/client";
 
 const ReportIncident = () => {
   const { categoryId } = useParams();
@@ -73,7 +74,7 @@ const ReportIncident = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (step === 1) {
@@ -89,6 +90,33 @@ const ReportIncident = () => {
       }
       setStep(3);
     } else {
+      // Salvar no banco de dados
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Você precisa estar logado para registrar ocorrências");
+        navigate("/auth");
+        return;
+      }
+
+      const { error } = await supabase
+        .from("incidents")
+        .insert({
+          user_id: user.id,
+          category_id: categoryId,
+          category_name: category?.name || "",
+          description: formData.description,
+          address: formData.address,
+          latitude: formData.coordinates[0],
+          longitude: formData.coordinates[1],
+          status: "pending"
+        });
+
+      if (error) {
+        toast.error("Erro ao registrar ocorrência");
+        console.error(error);
+        return;
+      }
+
       toast.success("Ocorrência registrada com sucesso!");
       navigate("/dashboard");
     }
