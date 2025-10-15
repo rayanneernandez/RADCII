@@ -11,6 +11,7 @@ import ReportIncident from "./pages/ReportIncident";
 import MyReports from "./pages/MyReports";
 import Priorities from "./pages/Priorities";
 import Account from "./pages/Account";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/my-reports" element={<MyReports />} />
             <Route path="/priorities" element={<Priorities />} />
             <Route path="/account" element={<Account />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
